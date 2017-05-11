@@ -71,17 +71,24 @@ def getSynonyms(word):
 
     return synonyms
 
-def generateResponse(userInputArray, ques, response):
+def generateResponse(userInputArray, ques, response,keywords):
+   keywords = " ".join(keywords)
    if not ((response == config.dbConnectionError) or (response == config.twoQuestionsError) or
          (response == config.noAppropriateResponseFound) or (response == config.ambiguousInput)):
-       if ques in userInputArray:
-           item = userInputArray.index(ques)
-           userInputArray[item] = response
+       if ques == "who":
+           response = response + " is " + keywords
 
-       userInputArray = [str(r) for r in userInputArray]
-       return ' '.join(userInputArray)
-   else:
-       return response
+       if ques == "where":
+           response = keywords + " at " + response
+
+       if ques == "what":
+           response = response + " is " + keywords
+
+       if ques == "when":
+           response = keywords + " is on " + response
+
+   print response
+   return response
 
 def removeSpaceKeyword(matchedKeywordList):
     print "before\n"+matchedKeywordList

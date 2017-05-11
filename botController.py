@@ -51,8 +51,6 @@ def handle_request(questions, keywords, userInput, userInputArray, conn):
 
         if (conn != "error"):
             response, image_url = pickBestResponse(keywords, userInput, userInputArray, questions[0], conn)
-            if questions[0] in config.whQuestionList:
-                response = lang_processor.generateResponse(userInputArray, questions[0], response)
 
         else:
             response = config.dbConnectionError
@@ -69,9 +67,11 @@ def pickBestResponse(keywords, userInput, userInputArray, questionPartInUserInpu
         pastResponse = pastResponses[0]
         if int(pastResponse['CurrentScore']) > 0:
             log.writetofile("I am giving a reply from my past experiences")
-            response = pastResponse['Answer'] + config.giveFeedback + str(pastResponse['ID'])
+            response = lang_processor.generateResponse(userInputArray, questionPartInUserInput, pastResponse['Answer'], keywords)
+            response = response + config.giveFeedback + str(pastResponse['ID'])
             image_url = pastResponse['Image_Url']
             database.storeMetricInES(userInput,response)
+
         else:
             log.writetofile(
                 "Score for my past experiences does not look good. I am gonna look for new responses in the DB")
@@ -160,7 +160,9 @@ def getBestResponseFromDB(keywords, userInput, userInputArray, questionPartInUse
                 sentResponseID = database.storeSentResponse(userInput, response, keywords, questionPartInUserInput, conn, image_url)
                 log.writetofile("storing sent response")
                 print sentResponseID
+                response = lang_processor.generateResponse(userInputArray, questionPartInUserInput, response, keywords)
                 response = response + config.giveFeedback + str(sentResponseID)
+
 
             return response, image_url
 
